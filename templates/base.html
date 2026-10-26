@@ -1,0 +1,43 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>{% block title %}Hospital ERP{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/tokens.css' %}">
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/components.css' %}">
+  <link rel="stylesheet" href="{% static 'css/layout.css' %}">
+  <script>
+    (function () {
+      var theme = localStorage.getItem("theme");
+      if (!theme) {
+        theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      }
+      document.documentElement.dataset.theme = theme;
+    })();
+  </script>
+</head>
+<body>
+{% include "components/icons.html" %}
+{% if user.is_authenticated %}
+  {% include "partials/topbar.html" %}
+  {% include "partials/sidebar.html" %}
+{% endif %}
+<main class="content{% if not user.is_authenticated %} content-standalone{% endif %}" id="content">
+  <div class="content-inner">
+    {% if user.is_authenticated and messages %}
+      {% for message in messages %}
+        {% include "components/alert.html" with kind=message.tags text=message %}
+      {% endfor %}
+    {% endif %}
+    {% block content %}{% endblock %}
+  </div>
+</main>
+<script src="{% static 'js/theme.js' %}" defer></script>
+<script src="{% static 'js/sidebar.js' %}" defer></script>
+<script src="{% static 'js/halftone.js' %}" defer></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

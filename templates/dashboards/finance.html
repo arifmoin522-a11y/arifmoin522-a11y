@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load core_tags %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<section class="dash-band">
+  <canvas class="halftone"
+          data-spacing="22" data-radius="4.5" data-speed="20" data-opacity="0.45"
+          aria-hidden="true"></canvas>
+  <div class="dash-band-copy surface">
+    <p class="eyebrow">Hospital ERP</p>
+    <h1>{% if role %}{{ role.name }}{% else %}Dashboard{% endif %} dashboard</h1>
+    <p class="text-muted">Choose an action below. Modules you do not have access to stay hidden.</p>
+  </div>
+</section>
+{% include "partials/dashboard_cards.html" %}
+{% endblock %}

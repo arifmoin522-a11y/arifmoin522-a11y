@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load core_tags %}
+{% block title %}{{ profile.user.full_name }} — staff profile{% endblock %}
+{% block content %}
+<header class="page-head">
+  <a class="link back" href="{% url 'staff_list' %}">Back to directory</a>
+  <h1>{{ profile.user.full_name }}</h1>
+</header>
+<section class="surface card-pad">
+  <dl class="kv">
+    <div><dt>Email</dt><dd>{{ profile.user.email }}</dd></div>
+    <div><dt>Role</dt><dd>{% if profile.user.role %}{{ profile.user.role.name }}{% else %}—{% endif %}</dd></div>
+    <div><dt>Department</dt><dd>{% if profile.department %}{{ profile.department.name }}{% else %}—{% endif %}</dd></div>
+    <div><dt>Phone</dt><dd>{{ profile.phone|default:"—" }}</dd></div>
+    <div><dt>License no.</dt><dd>{{ profile.license_no|default:"—" }}</dd></div>
+  </dl>
+</section>
+{% endblock %}

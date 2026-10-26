@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load core_tags %}
+{% block title %}Deactivate {{ a_user.full_name }}{% endblock %}
+{% block content %}
+<header class="page-head">
+  <a class="link back" href="{% url 'user_detail' a_user.pk %}">Back to user</a>
+  <h1>Deactivate user</h1>
+</header>
+<form method="post" class="surface card-pad confirm">
+  {% csrf_token %}
+  <p>Deactivate <strong>{{ a_user.full_name }}</strong> ({{ a_user.email }})?</p>
+  <p class="text-muted">The account and its staff profile are soft-deleted: history stays intact and the user can no longer sign in.</p>
+  <div class="actions">
+    <button type="submit" class="button button-filled">Deactivate user</button>
+    <a class="button button-text" href="{% url 'user_detail' a_user.pk %}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

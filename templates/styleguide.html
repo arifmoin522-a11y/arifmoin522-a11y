@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% load core_tags %}
+{% block title %}Styleguide — components{% endblock %}
+{% block content %}
+<header class="page-head"><h1>Styleguide</h1><p class="text-muted">Every component in both themes. Use the topbar toggle to switch theme.</p></header>
+
+<section class="surface card-pad style-block">
+  <h2>Typography</h2>
+  <p class="display">Display 28 — dashboard headings</p>
+  <h1>Headline 20</h1>
+  <h2>Section title 16/20</h2>
+  <p>Body 16 — the default reading size for forms and tables.</p>
+  <p class="text-muted">Muted 14 / 12 for hints and captions.</p>
+</section>
+
+<section class="surface card-pad style-block">
+  <h2>Buttons</h2>
+  <div class="button-row">
+    <button class="button button-filled" type="button">Filled</button>
+    <button class="button button-tonal" type="button">Tonal</button>
+    <button class="button button-outlined" type="button">Outlined</button>
+    <button class="button button-text" type="button">Text</button>
+    <button class="button button-filled" type="button">{% icon "check" %} With icon</button>
+    <button class="button button-filled button-block" type="button">Block button</button>
+  </div>
+</section>
+
+<section class="surface card-pad style-block">
+  <h2>Inputs &amp; selects</h2>
+  <div class="field">
+    <label class="field-label" for="sg-input">Text input</label>
+    <input id="sg-input" type="text" placeholder="Hospital name">
+  </div>
+  <div class="field">
+    <label class="field-label" for="sg-select">Select</label>
+    <select id="sg-select"><option>Emergency</option><option>Radiology</option></select>
+  </div>
+  <div class="searchfield">
+    {% icon "search" %}
+    <input type="search" placeholder="Search anything">
+  </div>
+</section>
+
+<section class="surface card-pad style-block">
+  <h2>Badges — status without colour</h2>
+  <div class="button-row">
+    <span class="badge badge-done">{% icon "check" %} Done</span>
+    <span class="badge badge-pending">{% icon "arrow_forward" %} Pending</span>
+    <span class="badge badge-urgent">{% icon "alert" %} Urgent</span>
+  </div>
+</section>
+
+<section class="surface card-pad style-block">
+  <h2>Alerts</h2>
+  {% include "components/alert.html" with kind="info" text="Informational message for neutral context." %}
+  {% include "components/alert.html" with kind="success" text="Success message after a completed action." %}
+  {% include "components/alert.html" with kind="error" text="Error message for failed validation or denied access." %}
+</section>
+
+<section class="surface card-pad style-block">
+  <h2>Table</h2>
+  <table class="table">
+    <thead><tr><th>Name</th><th>Role</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>Ada Admin</td><td>Super Admin</td><td><span class="badge badge-done">{% icon "check" %} Active</span></td></tr>
+      <tr><td>Dolores Doctor</td><td>Doctor</td><td><span class="badge badge-pending">{% icon "arrow_forward" %} Onboarding</span></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="surface card-pad style-block">
+  <h2>Empty state</h2>
+  {% include "components/empty.html" with icon_name="history" title="Nothing here yet" hint="Empty states show the halftone texture." %}
+</section>
+
+<section class="surface card-pad style-block">
+  <h2>Chips &amp; cards</h2>
+  <ul class="chip-list"><li><span class="chip">user.view</span></li><li><span class="chip">role.edit</span></li></ul>
+</section>
+{% endblock %}

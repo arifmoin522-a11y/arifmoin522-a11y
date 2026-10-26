@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load core_tags %}
+{% block title %}Delete {{ role.name }}{% endblock %}
+{% block content %}
+<header class="page-head">
+  <a class="link back" href="{% url 'role_detail' role.pk %}">Back to role</a>
+  <h1>Delete role</h1>
+</header>
+<form method="post" class="surface card-pad confirm">
+  {% csrf_token %}
+  <p>Delete <strong>{{ role.name }}</strong>?</p>
+  {% if role.users.count %}
+    <p class="text-muted">This role still has {{ role.users.count }} user(s). Reassign them first — deletion will be refused.</p>
+    <div class="actions"><a class="button button-text" href="{% url 'role_detail' role.pk %}">Back</a></div>
+  {% else %}
+    <p class="text-muted">No users depend on this role; it can be deleted safely.</p>
+    <div class="actions">
+      <button type="submit" class="button button-filled">Delete role</button>
+      <a class="button button-text" href="{% url 'role_detail' role.pk %}">Cancel</a>
+    </div>
+  {% endif %}
+</form>
+{% endblock %}

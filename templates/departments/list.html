@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load core_tags %}
+{% block title %}Departments{% endblock %}
+{% block content %}
+<header class="page-head"><h1>Departments</h1></header>
+<form class="toolbar" method="get" role="search">
+  <div class="searchfield">
+    {% icon "search" %}
+    <input type="search" name="q" value="{{ q }}" placeholder="Search departments" aria-label="Search departments">
+  </div>
+  <button type="submit" class="button button-tonal">Search</button>
+  {% if can_edit %}<a class="button button-filled" href="{% url 'department_add' %}">New department</a>{% endif %}
+</form>
+<div class="surface">
+  <table class="table">
+    <thead><tr><th>Name</th><th>Description</th><th>Actions</th></tr></thead>
+    <tbody>
+      {% for department in page %}
+        <tr>
+          <td>{{ department.name }}</td>
+          <td>{{ department.description|default:"—" }}</td>
+          <td>
+            {% if can_edit %}
+              <div class="row-actions">
+                <a class="button button-tonal" href="{% url 'department_edit' department.pk %}">Edit</a>
+                <a class="button button-text" href="{% url 'department_remove' department.pk %}">Archive</a>
+              </div>
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="3">{% include "components/empty.html" with icon_name="department" title="No departments found" hint="Create one from the button above." %}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "components/pagination.html" with page=page q=q %}
+{% endblock %}

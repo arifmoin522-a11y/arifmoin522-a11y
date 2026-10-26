@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load core_tags %}
+{% block title %}{{ a_user.full_name }}{% endblock %}
+{% block content %}
+<header class="page-head">
+  <a class="link back" href="{% url 'user_list' %}">Back to users</a>
+  <h1>{{ a_user.full_name }}</h1>
+</header>
+<div class="detail-grid">
+  <section class="surface card-pad">
+    <h2>Account</h2>
+    <dl class="kv">
+      <div><dt>Email</dt><dd>{{ a_user.email }}</dd></div>
+      <div><dt>Role</dt><dd>{% if a_user.role %}{{ a_user.role.name }}{% else %}—{% endif %}</dd></div>
+      <div><dt>Status</dt><dd>
+        {% if a_user.is_active %}{% include "components/badge.html" with variant="done" label="Active" %}
+        {% else %}{% include "components/badge.html" with variant="pending" label="Inactive" %}{% endif %}
+      </dd></div>
+      <div><dt>Staff access</dt><dd>{{ a_user.is_staff|yesno:"Yes,No" }}</dd></div>
+      <div><dt>Joined</dt><dd>{{ a_user.date_joined|date:"Y-m-d H:i" }}</dd></div>
+    </dl>
+    {% if can_edit %}
+    <div class="actions">
+      <a class="button button-filled" href="{% url 'user_edit' a_user.pk %}">Edit user</a>
+      {% if a_user.is_active %}<a class="button button-outlined" href="{% url 'user_remove' a_user.pk %}">Deactivate</a>{% endif %}
+    </div>
+    {% endif %}
+  </section>
+  <section class="surface card-pad">
+    <h2>Staff profile</h2>
+    {% if profile %}
+      <dl class="kv">
+        <div><dt>Department</dt><dd>{% if profile.department %}{{ profile.department.name }}{% else %}—{% endif %}</dd></div>
+        <div><dt>Phone</dt><dd>{{ profile.phone|default:"—" }}</dd></div>
+        <div><dt>License no.</dt><dd>{{ profile.license_no|default:"—" }}</dd></div>
+      </dl>
+    {% else %}
+      {% include "components/empty.html" with icon_name="id_card" title="No staff profile" %}
+    {% endif %}
+  </section>
+</div>
+<section class="surface card-pad">
+  <h2>Recent activity</h2>
+  {% if logs %}
+    <table class="table">
+      <thead><tr><th>When</th><th>Action</th><th>Details</th></tr></thead>
+      <tbody>
+        {% for log in logs %}
+          <tr><td>{{ log.timestamp|date:"Y-m-d H:i" }}</td><td><span class="chip">{{ log.get_action_display }}</span></td><td>{{ log.details }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    {% include "components/empty.html" with icon_name="history" title="No activity recorded" %}
+  {% endif %}
+</section>
+{% endblock %}

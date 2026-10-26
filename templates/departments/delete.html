@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load core_tags %}
+{% block title %}Archive {{ department.name }}{% endblock %}
+{% block content %}
+<header class="page-head">
+  <a class="link back" href="{% url 'department_list' %}">Back to departments</a>
+  <h1>Archive department</h1>
+</header>
+<form method="post" class="surface card-pad confirm">
+  {% csrf_token %}
+  <p>Archive <strong>{{ department.name }}</strong>?</p>
+  <p class="text-muted">Soft-deleted: it disappears from the default views but stays in the database for history and audits.</p>
+  <div class="actions">
+    <button type="submit" class="button button-filled">Archive</button>
+    <a class="button button-text" href="{% url 'department_list' %}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

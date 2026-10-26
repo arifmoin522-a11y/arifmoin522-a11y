@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load core_tags %}
+{% block title %}{{ role.name }}{% endblock %}
+{% block content %}
+<header class="page-head">
+  <a class="link back" href="{% url 'role_list' %}">Back to roles</a>
+  <h1>{{ role.name }}</h1>
+</header>
+<section class="surface card-pad">
+  <p class="text-muted">{{ role.description }}</p>
+  <dl class="kv">
+    <div><dt>Dashboard template</dt><dd><span class="chip">{{ role.dashboard_template|default:"generic (fallback)" }}</span></dd></div>
+    <div><dt>Users in role</dt><dd>{{ role.users.count }}</dd></div>
+  </dl>
+</section>
+<section class="surface card-pad">
+  <h2>Permission codes</h2>
+  {% if role.permissions.all %}
+    <ul class="chip-list">
+      {% for permission in role.permissions.all %}<li><span class="chip">{{ permission.code }}</span></li>{% endfor %}
+    </ul>
+  {% else %}
+    {% include "components/empty.html" with icon_name="badge" title="No permissions granted" hint="Only the dashboard is visible to users in this role." %}
+  {% endif %}
+</section>
+{% endblock %}

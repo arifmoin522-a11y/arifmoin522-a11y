@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load core_tags %}
+{% block title %}Sign in — Hospital ERP{% endblock %}
+{% block content %}
+<div class="auth">
+  <div class="auth-canvas" aria-hidden="true">
+    <canvas class="halftone"
+            data-spacing="16" data-radius="5" data-speed="26" data-opacity="0.5"
+            aria-hidden="true"></canvas>
+  </div>
+  <section class="auth-card surface">
+    <header class="auth-head">
+      <span class="brand-mark" aria-hidden="true">H</span>
+      <h1>Sign in</h1>
+      <p class="text-muted">Hospital Management ERP — Phase 1</p>
+    </header>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+        {% for error in form.non_field_errors %}
+          {% include "components/alert.html" with kind="error" text=error %}
+        {% endfor %}
+      {% endif %}
+      <div class="field">
+        <label class="field-label" for="{{ form.username.id_for_label }}">Email</label>
+        {{ form.username }}
+        {% if form.username.errors %}<p class="field-error">{{ form.username.errors.0 }}</p>{% endif %}
+      </div>
+      <div class="field">
+        <label class="field-label" for="{{ form.password.id_for_label }}">Password</label>
+        {{ form.password }}
+        {% if form.password.errors %}<p class="field-error">{{ form.password.errors.0 }}</p>{% endif %}
+      </div>
+      <button type="submit" class="button button-filled button-block">Sign in</button>
+    </form>
+    <p class="auth-foot">Demo data is seeded by <code>seed_users</code>.</p>
+  </section>
+</div>
+{% endblock %}

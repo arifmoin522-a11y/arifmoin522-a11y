@@ -1,0 +1,37 @@
+{% load core_tags %}
+<header class="topbar">
+  <button type="button" class="icon-button" data-sidebar-toggle aria-label="Toggle sidebar" aria-controls="sidebar" aria-expanded="false">
+    {% icon "menu" %}
+  </button>
+  <a class="brand" href="{{ nav_modules.0.url|default:'/' }}">
+    <span class="brand-mark" aria-hidden="true">H</span>
+    <span class="brand-name">Hospital ERP</span>
+  </a>
+  {% if user.is_authenticated and can_search_users %}
+    <form class="searchfield" action="{% url 'user_list' %}" method="get" role="search">
+      {% icon "search" %}
+      <input type="search" name="q" placeholder="Search users" aria-label="Search users">
+    </form>
+  {% endif %}
+  <div class="topbar-actions">
+    <button type="button" class="icon-button" data-theme-toggle aria-label="Toggle dark theme">
+      <span data-icon-light>{% icon "light_mode" %}</span>
+      <span data-icon-dark hidden>{% icon "dark_mode" %}</span>
+    </button>
+    {% if user.is_authenticated %}
+    <details class="user-menu">
+      <summary class="avatar" aria-label="Account menu">
+        <span>{{ user.full_name|default:user.email }}</span>
+        {% if user.role %}<span class="chip">{{ user.role.name }}</span>{% endif %}
+      </summary>
+      <div class="menu-surface">
+        <p class="menu-caption">{{ user.email }}</p>
+        <form action="{% url 'logout' %}" method="post">
+          {% csrf_token %}
+          <button type="submit" class="menu-item">{% icon "logout" %} Sign out</button>
+        </form>
+      </div>
+    </details>
+    {% endif %}
+  </div>
+</header>

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load core_tags %}
+{% block title %}Staff directory{% endblock %}
+{% block content %}
+<header class="page-head"><h1>Staff directory</h1></header>
+<form class="toolbar" method="get" role="search">
+  <div class="searchfield">
+    {% icon "search" %}
+    <input type="search" name="q" value="{{ q }}" placeholder="Name, email or department" aria-label="Search staff">
+  </div>
+  <button type="submit" class="button button-tonal">Search</button>
+</form>
+<div class="surface">
+  <table class="table">
+    <thead><tr><th>Name</th><th>Department</th><th>Role</th><th>Phone</th></tr></thead>
+    <tbody>
+      {% for profile in page %}
+        <tr>
+          <td><a class="link" href="{% url 'staff_detail' profile.pk %}">{{ profile.user.full_name }}</a></td>
+          <td>{% if profile.department %}{{ profile.department.name }}{% else %}—{% endif %}</td>
+          <td>{% if profile.user.role %}{{ profile.user.role.name }}{% else %}—{% endif %}</td>
+          <td>{{ profile.phone|default:"—" }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="4">{% include "components/empty.html" with icon_name="id_card" title="No staff found" hint="Adjust the search." %}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "components/pagination.html" with page=page q=q %}
+{% endblock %}

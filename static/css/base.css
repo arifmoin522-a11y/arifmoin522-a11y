@@ -1,0 +1,59 @@
+/* Reset + typography + focus + halftone primitives. */
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html { font-size: 16px; }
+
+body {
+  margin: 0;
+  font-family: var(--font-stack);
+  font-size: var(--fs-16);
+  font-weight: var(--fw-regular);
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, p { margin: 0; }
+h1 { font-size: var(--fs-28); font-weight: var(--fw-bold); }
+h2 { font-size: var(--fs-16); font-weight: var(--fw-bold); }
+.display { font-size: var(--fs-28); font-weight: var(--fw-bold); }
+p, li { font-size: var(--fs-16); }
+.text-muted { color: var(--text-muted); font-size: var(--fs-14); }
+.eyebrow {
+  font-size: var(--fs-12);
+  font-weight: var(--fw-medium);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+code {
+  font-family: ui-monospace, "SF Mono", monospace;
+  font-size: var(--fs-14);
+  background: var(--surface-2);
+  border-radius: 6px;
+  padding: 0.1em 0.35em;
+}
+
+a { color: var(--text); text-decoration: none; }
+.link { text-decoration: underline; text-underline-offset: 2px; }
+.link:hover, a:hover { text-decoration-thickness: 1.5px; }
+.back { display: inline-block; margin-bottom: var(--space, 8px); color: var(--text-muted); }
+
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+/* Icons */
+.icon { width: 22px; height: 22px; display: inline-block; vertical-align: middle; flex: none; }
+.icon-sprite { width: 0; height: 0; position: absolute; overflow: hidden; }
+
+/* Halftone canvas host — dotted texture areas. Text always sits on a surface card. */
+.halftone {
+  display: block;
+  width: 100%;
+  height: 100%;
+}

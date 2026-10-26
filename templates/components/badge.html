@@ -1,0 +1,12 @@
+{% load core_tags %}
+{% comment %}
+Status badge — status is colour-independent: icon + text + fill style.
+Variants: done (filled check), pending (outlined arrow), urgent (filled alert, bold).
+{% endcomment %}
+{% if variant == "done" %}
+  <span class="badge badge-done">{% icon "check" %} {{ label|default:"Done" }}</span>
+{% elif variant == "urgent" %}
+  <span class="badge badge-urgent">{% icon "alert" %} {{ label|default:"Urgent" }}</span>
+{% else %}
+  <span class="badge badge-pending">{% icon "arrow_forward" %} {{ label|default:"Pending" }}</span>
+{% endif %}

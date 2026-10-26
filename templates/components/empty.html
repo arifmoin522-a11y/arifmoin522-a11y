@@ -1,0 +1,12 @@
+{% load core_tags %}
+{% comment %}
+Usage: {% include "components/empty.html" with icon_name="history" title="Nothing here yet" hint="..." %}
+{% endcomment %}
+<div class="empty">
+  <div class="empty-art">
+    <canvas class="halftone" data-spacing="18" data-radius="4" data-speed="24" data-opacity="0.35" aria-hidden="true"></canvas>
+  </div>
+  <span class="empty-icon">{% icon icon_name|default:"info" %}</span>
+  <p class="empty-title">{{ title|default:"Nothing here yet" }}</p>
+  {% if hint %}<p class="empty-hint">{{ hint }}</p>{% endif %}
+</div>

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load core_tags %}
+{% block title %}Roles{% endblock %}
+{% block content %}
+<header class="page-head"><h1>Roles &amp; permissions</h1></header>
+<div class="surface">
+  <table class="table">
+    <thead><tr><th>Role</th><th>Permissions</th><th>Users</th><th>Dashboard</th></tr></thead>
+    <tbody>
+      {% for role in roles %}
+        <tr>
+          <td><a class="link" href="{% url 'role_detail' role.pk %}">{{ role.name }}</a></td>
+          <td>{{ role.permissions.count }}</td>
+          <td>{{ role.users.count }}</td>
+          <td><span class="chip">{{ role.dashboard_template|default:"generic"|cut:"dashboards/"|cut:".html" }}</span></td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="4">{% include "components/empty.html" with icon_name="badge" title="No roles" hint="Run seed_roles." %}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

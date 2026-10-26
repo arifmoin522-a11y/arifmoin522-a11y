@@ -1,0 +1,52 @@
+/* Single source of truth: palette, type, spacing tokens. Pure grayscale. */
+:root {
+  --bg: #ffffff;
+  --surface: #f8f9fa;        /* panels & menus */
+  --surface-2: #f1f3f4;      /* subtle fills (hover, headers) */
+  --border: #dadce0;         /* 1px lines */
+  --text: #202124;           /* primary text */
+  --text-muted: #5f6368;     /* secondary text */
+  --ink: #202124;            /* halftone dots & focus rings */
+  --ink-contrast: #ffffff;   /* dots/text on filled surfaces */
+
+  --font-stack: "Google Sans", "Inter", system-ui, -apple-system, "Segoe UI", roboto, sans-serif;
+  --fs-12: 0.75rem;
+  --fs-14: 0.875rem;
+  --fs-16: 1rem;
+  --fs-20: 1.25rem;
+  --fs-28: 1.75rem;
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-bold: 700;
+
+  --radius-lg: 12px;
+  --radius-pill: 999px;
+
+  --topbar-h: 64px;
+  --sidebar-w: 256px;
+  --content-max: 1200px;
+}
+
+[data-theme="dark"] {
+  --bg: #202124;
+  --surface: #17181a;
+  --surface-2: #2a2b2d;
+  --border: #5f6368;
+  --text: #e8eaed;
+  --text-muted: #9aa0a6;
+  --ink: #e8eaed;
+  --ink-contrast: #202124;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #202124;
+    --surface: #17181a;
+    --surface-2: #2a2b2d;
+    --border: #5f6368;
+    --text: #e8eaed;
+    --text-muted: #9aa0a6;
+    --ink: #e8eaed;
+    --ink-contrast: #202124;
+  }
+}

@@ -1,0 +1,23 @@
+{% load core_tags %}{% comment %}Action cards grid driven by the module registry{% endcomment %}
+<div class="card-grid">
+  {% for item in dashboard_cards %}
+    <article class="card{% if not item.active %} card-placeholder{% endif %}">
+      {% if item.active %}
+        <a class="card-link" href="{{ item.url }}">
+          {% icon item.icon %}
+          <span class="card-title">{{ item.label }}</span>
+          <span class="card-arrow">{% icon "arrow_forward" %}</span>
+        </a>
+      {% else %}
+        <div class="card-link" aria-disabled="true">
+          {% icon item.icon %}
+          <span class="card-title">{{ item.label }}</span>
+          <span class="badge badge-pending">Coming soon</span>
+        </div>
+      {% endif %}
+    </article>
+  {% endfor %}
+</div>
+{% if not dashboard_cards %}
+  {% include "components/empty.html" with icon_name="dashboard" title="No modules are enabled for your role" hint="Ask a Super Admin to grant permissions." %}
+{% endif %}

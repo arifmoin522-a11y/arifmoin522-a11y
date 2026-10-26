@@ -1,0 +1,13 @@
+{% load core_tags %}
+{% comment %}
+Usage: {% include "components/alert.html" with kind=message.tags text=message %}
+kind: info | success | error | warning (Django message tags)
+{% endcomment %}
+<div class="alert alert-{{ kind|default:'info' }}" role="alert">
+  <span class="alert-icon">
+    {% if kind == "success" %}{% icon "check" %}
+    {% elif kind == "error" or kind == "warning" %}{% icon "alert" %}
+    {% else %}{% icon "info" %}{% endif %}
+  </span>
+  <span>{{ text }}</span>
+</div>

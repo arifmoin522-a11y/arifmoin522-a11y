@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load core_tags %}
+{% block title %}Audit log{% endblock %}
+{% block content %}
+<header class="page-head"><h1>Audit log</h1></header>
+<form class="toolbar" method="get">
+  <div class="searchfield">
+    {% icon "search" %}
+    <input type="search" name="q" value="{{ q }}" placeholder="Details, email or object" aria-label="Search audit log">
+  </div>
+  <label class="selectfield" aria-label="Action filter">
+    <select name="action">
+      <option value="">All actions</option>
+      {% for value, label in actions %}
+        <option value="{{ value }}" {% if value == action %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <button type="submit" class="button button-tonal">Filter</button>
+</form>
+<div class="surface">
+  <table class="table">
+    <thead><tr><th>Timestamp</th><th>User</th><th>Action</th><th>Object</th><th>IP</th><th>Details</th></tr></thead>
+    <tbody>
+      {% for entry in page %}
+        <tr>
+          <td>{{ entry.timestamp|date:"Y-m-d H:i:s" }}</td>
+          <td>{% if entry.user %}{{ entry.user.email }}{% else %}—{% endif %}</td>
+          <td><span class="chip">{{ entry.get_action_display }}</span></td>
+          <td>{{ entry.object_type }} {% if entry.object_id %}<span class="text-muted">#{{ entry.object_id }}</span>{% endif %}</td>
+          <td>{{ entry.ip_address|default:"—" }}</td>
+          <td class="cell-wrap">{{ entry.details }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="6">{% include "components/empty.html" with icon_name="history" title="No audit entries match" %}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "components/pagination.html" with page=page q=q %}
+{% endblock %}

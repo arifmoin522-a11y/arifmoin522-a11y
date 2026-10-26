@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Access denied{% endblock %}
+{% block content %}
+<div class="error-page">
+  <section class="surface card-pad">
+    <h1>Access denied</h1>
+    <p class="text-muted">Your role does not include this module. The attempt has been recorded in the audit log.</p>
+    <a class="button button-filled" href="/">Back to dashboard</a>
+  </section>
+</div>
+{% endblock %}

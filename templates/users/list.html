@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load core_tags %}
+{% block title %}Users{% endblock %}
+{% block content %}
+<header class="page-head">
+  <h1>Users</h1>
+</header>
+{% if q %}
+{% include "components/alert.html" with kind="info" text="Showing results for ‘{{ q }}’." %}
+{% endif %}
+<form class="toolbar" method="get" role="search">
+  <div class="searchfield">
+    {% icon "search" %}
+    <input type="search" name="q" value="{{ q }}" placeholder="Search by email or name" aria-label="Search users">
+  </div>
+  <button type="submit" class="button button-tonal">Search</button>
+  <a class="button button-filled" href="{% url 'user_add' %}">New user</a>
+</form>
+<div class="surface">
+  <table class="table">
+    <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th></tr></thead>
+    <tbody>
+      {% for a_user in page %}
+        <tr>
+          <td><a class="link" href="{% url 'user_detail' a_user.pk %}">{{ a_user.full_name }}</a></td>
+          <td>{{ a_user.email }}</td>
+          <td>{% if a_user.role %}{{ a_user.role.name }}{% else %}—{% endif %}</td>
+          <td>
+            {% if a_user.is_active %}{% include "components/badge.html" with variant="done" label="Active" %}
+            {% else %}{% include "components/badge.html" with variant="pending" label="Inactive" %}{% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="4">{% include "components/empty.html" with icon_name="people" title="No users found" hint="Adjust the search or add a new user." %}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "components/pagination.html" with page=page q=q %}
+{% endblock %}
