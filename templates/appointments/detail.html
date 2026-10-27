@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% load core_tags %}
+{% block title %}Appointment {{ appt.appointment_code }}{% endblock %}
+{% block content %}
+<header class="page-head">
+  <a class="link back" href="{% url 'appointment_list' %}">Back to schedule</a>
+  <h1>Appointment {{ appt.appointment_code }}</h1>
+  {% include "components/appointment_status.html" with appt=appt %}
+</header>
+
+<section class="surface card-pad">
+  <h2>Visit information</h2>
+  <ul class="detail-list">
+    <li><span>Patient</span>
+      <strong><a class="link" href="{% url 'patient_detail' appt.patient.pk %}"><span class="chip">{{ appt.patient.patient_code }}</span> {{ appt.patient.full_name }}</a></strong></li>
+    <li><span>Doctor</span> <strong>{{ appt.doctor.full_name }}</strong></li>
+    <li><span>When</span> <strong>{{ appt.local_date }} · {{ appt.scheduled_start|date:'H:i' }}–{{ appt.scheduled_end|date:'H:i' }}</strong></li>
+    <li><span>Department</span> <strong>{{ appt.department.name|default:"—" }}</strong></li>
+    <li><span>Reason</span> <strong>{{ appt.reason|default:"— not recorded —" }}</strong></li>
+    <li><span>Queue number</span> <strong>{% if appt.queue_number %}#{{ appt.queue_number }}{% else %}—{% endif %}</strong></li>
+    {% if appt.cancellation_reason %}<li><span>Cancellation reason</span> <strong>{{ appt.cancellation_reason }}</strong></li>{% endif %}
+  </ul>
+</section>
+
+{% if actions %}
+<section class="surface card-pad">
+  <h2>Desk actions</h2>
+  <div class="actions">
+    {% if actions.checkin %}
+    <form method="post" action="{% url 'appointment_checkin' appt.pk %}">{% csrf_token %}
+      <button type="submit" class="button button-filled">{% icon "check" %} Check in</button>
+    </form>
+    {% endif %}
+    {% if actions.start %}
+    <form method="post" action="{% url 'appointment_start' appt.pk %}">{% csrf_token %}
+      <button type="submit" class="button button-filled">{% icon "arrow_forward" %} Start visit</button>
+    </form>
+    {% endif %}
+    {% if actions.complete %}
+    <form method="post" action="{% url 'appointment_complete' appt.pk %}">{% csrf_token %}
+      <button type="submit" class="button button-tonal">{% icon "check" %} Complete visit</button>
+    </form>
+    {% endif %}
+    {% if actions.no_show %}
+    <form method="post" action="{% url 'appointment_no_show' appt.pk %}">{% csrf_token %}
+      <button type="submit" class="button button-tonal">{% icon "close" %} Mark no-show</button>
+    </form>
+    {% endif %}
+  </div>
+
+  {% if actions.cancel %}
+  <details class="modal-lite">
+    <summary class="button button-tonal">{% icon "close" %} Cancel appointment</summary>
+    <form method="post" action="{% url 'appointment_cancel' appt.pk %}" class="form-stack modal-lite-body">
+      {% csrf_token %}
+      <p class="text-muted">A cancellation reason is mandatory; the window rule still applies before the slot can be changed.</p>
+      {% include "components/field.html" with field=cancel_form.reason %}
+      <button type="submit" class="button button-tonal">Cancel this appointment</button>
+    </form>
+  </details>
+  {% endif %}
+
+  {% if actions.reschedule %}
+  <a class="button button-tonal" href="{% url 'appointment_reschedule' appt.pk %}">{% icon "calendar" %} Reschedule</a>
+  {% endif %}
+</section>
+{% else %}
+<p class="text-muted">This appointment is in a terminal state; history below stays visible.</p>
+{% endif %}
+
+<section class="surface card-pad">
+  <h2>History</h2>
+  {% if appt.rescheduled_from_id %}
+    <p>Rescheduled from <a class="link" href="{% url 'appointment_detail' appt.rescheduled_from_id %}">{{ appt.rescheduled_from.appointment_code }}</a>.</p>
+  {% endif %}
+  {% if appt.rescheduled_to_id %}
+    <p>Follow-up record: <a class="link" href="{% url 'appointment_detail' appt.rescheduled_to_id %}">{{ appt.rescheduled_to.appointment_code }}</a> (this record is kept cancelled).</p>
+  {% endif %}
+  <table class="table">
+    <thead><tr><th>When</th><th>User</th><th>Action</th></tr></thead>
+    <tbody>
+      {% for log in logs %}
+      <tr>
+        <td>{{ log.timestamp|date:'Y-m-d H:i' }}</td>
+        <td>{{ log.user.email|default:"—" }}</td>
+        <td><span class="chip">{{ log.get_action_display }}</span></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="3" class="text-muted">No audit entries yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

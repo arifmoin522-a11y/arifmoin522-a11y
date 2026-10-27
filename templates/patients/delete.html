@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load core_tags %}
+{% block title %}Archive {{ patient.patient_code }}{% endblock %}
+{% block content %}
+<header class="page-head">
+  <a class="link back" href="{% url 'patient_detail' patient.pk %}">Back to patient</a>
+  <h1>Archive {{ patient.full_name }}</h1>
+</header>
+<section class="surface card-pad confirm">
+  <p><strong>{{ patient.patient_code }}</strong> — {{ patient.full_name }} ({{ patient.date_of_birth|date:"Y-m-d" }})</p>
+  <p>Archiving hides the record from lists and dashboards. The record stays in
+     the database and its appointments remain valid.</p>
+  <form method="post" class="actions">
+    {% csrf_token %}
+    <button type="submit" class="button button-filled">Archive patient</button>
+    <a class="button button-outlined" href="{% url 'patient_detail' patient.pk %}">Keep record</a>
+  </form>
+</section>
+{% endblock %}

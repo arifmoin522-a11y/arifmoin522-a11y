@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load core_tags %}
+{% block title %}Reschedule {{ appt.appointment_code }}{% endblock %}
+{% block content %}
+<header class="page-head">
+  <a class="link back" href="{% url 'appointment_detail' appt.pk %}">Back to appointment</a>
+  <h1>Reschedule {{ appt.appointment_code }}</h1>
+  <p class="text-muted">The original record stays cancelled with your reason; the patient keeps only one active visit.</p>
+</header>
+
+<section class="surface card-pad">
+  <h2>1. Reason, doctor and day</h2>
+  {% if form.errors %}{% include "components/alert.html" with kind="error" text="Please review the highlighted fields." %}{% endif %}
+  <form method="post" class="form-stack" novalidate>
+    {% csrf_token %}
+    <input type="hidden" name="action" value="pick">
+    <div class="form-row">
+      {% include "components/field.html" with field=form.date %}
+      {% include "components/field.html" with field=form.doctor %}
+    </div>
+    {% include "components/field.html" with field=form.reason %}
+    <button type="submit" class="button button-tonal">Show open slots</button>
+  </form>
+</section>
+
+{% if slots is not None %}
+<section class="surface card-pad">
+  <h2>2. Pick the new slot</h2>
+  {% if not slots %}
+    {% include "components/empty.html" with icon_name="calendar" title="No open slots that day" hint="Booked times and leave days are hidden. Pick another date." %}
+  {% endif %}
+  <form method="post" class="slot-pick-forms">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="confirm">
+    <input type="hidden" name="doctor" value="{{ reschedule_doctor.pk }}">
+    <input type="hidden" name="date" value="{{ day|date:'Y-m-d' }}">
+    <input type="hidden" name="reason" value="{{ form.data.reason }}">
+    <div class="slot-grid">
+      {% for s in slots %}
+        <button type="submit" class="slot-button" name="slot" value="{{ s.start|date:'Hi' }}">{{ s.start|date:'H:i' }}</button>
+      {% endfor %}
+    </div>
+    <p class="text-muted">{% if slots %}Each slot is re-validated at confirm time; if it was taken meanwhile you'll be asked to pick again.{% endif %}</p>
+  </form>
+</section>
+{% endif %}
+{% endblock %}

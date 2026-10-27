@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% load core_tags %}
+{% block title %}{% if full_view %}Schedule{% else %}My appointments{% endif %}{% endblock %}
+{% block content %}
+<header class="page-head">
+  <h1>{% if full_view %}Schedule{% else %}My appointments{% endif %}</h1>
+  <nav class="date-nav" aria-label="Day navigation">
+    <a class="button button-tonal" href="?date={{ prev_day|date:'Y-m-d' }}">Previous day</a>
+    <a class="button button-tonal" href="?date={{ today|date:'Y-m-d' }}">Today</a>
+    <a class="button button-tonal" href="?date={{ next_day|date:'Y-m-d' }}">Next day</a>
+  </nav>
+</header>
+
+<form class="toolbar" method="get">
+  <div class="searchfield">
+    {% icon "calendar" %}
+    <input type="date" name="date" value="{{ day|date:'Y-m-d' }}" aria-label="Schedule date">
+  </div>
+  {% if doctors %}
+  <div class="searchfield">
+    {% icon "person" %}
+    <select name="doctor" aria-label="Filter by doctor">
+      <option value="">All doctors</option>
+      {% for d in doctors %}<option value="{{ d.pk }}" {% if d.pk|stringformat:"s" == doctor_id %}selected{% endif %}>{{ d.full_name }}</option>{% endfor %}
+    </select>
+  </div>
+  {% endif %}
+  <button type="submit" class="button button-tonal">Show</button>
+</form>
+
+<div class="counts-strip">
+  <span class="chip">{% icon "calendar" %} {{ counts.total }} active</span>
+  <span class="chip">{% icon "check" %} {{ counts.checked_in }} checked in</span>
+  <span class="chip">{% icon "clock" %} {{ counts.waiting }} waiting</span>
+  <span class="chip">{% icon "history" %} {{ counts.completed }} completed</span>
+</div>
+
+<div class="surface">
+  <table class="table appointment-rows">
+    <thead><tr><th>Slot</th><th>Patient</th><th>Doctor</th><th>Queue</th><th>Status</th><th class="actions-head">Actions</th></tr></thead>
+    <tbody>
+      {% for row in rows %}
+        {% with appt=row.appt actions=row.actions %}
+        <tr>
+          <td>
+            <strong>{{ appt.scheduled_start|date:'H:i' }}–{{ appt.scheduled_end|date:'H:i' }}</strong><br>
+            <span class="chip">{{ appt.appointment_code }}</span>
+          </td>
+          <td><a class="link" href="{% url 'patient_detail' appt.patient.pk %}"><span class="chip">{{ appt.patient.patient_code }}</span> {{ appt.patient.full_name }}</a></td>
+          <td>{{ appt.doctor.full_name }}{% if appt.department %}<br><small class="text-muted">{% icon "department" %} {{ appt.department.name }}</small>{% endif %}</td>
+          <td>{% if appt.queue_number %}<span class="queue-number">#{{ appt.queue_number }}</span>{% else %}<span class="text-muted">—</span>{% endif %}</td>
+          <td>{% include "components/appointment_status.html" with appt=appt %}</td>
+          <td class="row-actions">
+            <a class="button button-outlined" href="{% url 'appointment_detail' appt.pk %}">Open</a>
+            {% if actions.checkin %}<form method="post" action="{% url 'appointment_checkin' appt.pk %}">{% csrf_token %}<button type="submit" class="button button-filled">Check in</button></form>{% endif %}
+            {% if actions.no_show %}<form method="post" action="{% url 'appointment_no_show' appt.pk %}">{% csrf_token %}<button type="submit" class="button button-tonal">No show</button></form>{% endif %}
+            {% if actions.reschedule %}<a class="button button-tonal" href="{% url 'appointment_reschedule' appt.pk %}">Reschedule</a>{% endif %}
+          </td>
+        </tr>
+        {% endwith %}
+      {% empty %}
+        <tr><td colspan="6">{% include "components/empty.html" with icon_name="calendar" title="No appointments this day" hint="Book one from the dashboard or use the booking flow." %}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p class="book-cta">{% if full_view %}Doctors lead their own lists; check-in always lands here.{% else %}Your day is your own; counts above count your patients only.{% endif %}</p>
+</div>
+{% if page %}{% include "components/pagination.html" with page=page %}{% endif %}
+
+{% if not full_view %}
+<section class="surface card-pad">
+  <h2>Upcoming visits</h2>
+  <table class="table">
+    <thead><tr><th>Slot</th><th>Patient</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+      {% for row in upcoming_rows %}
+        {% with appt=row.appt %}
+        <tr>
+          <td>{{ appt.local_date }} {{ appt.scheduled_start|date:'H:i' }}</td>
+          <td><a class="link" href="{% url 'patient_detail' appt.patient.pk %}"><span class="chip">{{ appt.patient.patient_code }}</span> {{ appt.patient.full_name }}</a></td>
+          <td>{% include "components/appointment_status.html" with appt=appt %}</td>
+          <td><a class="button button-outlined" href="{% url 'appointment_detail' appt.pk %}">Open</a></td>
+        </tr>
+        {% endwith %}
+      {% empty %}
+        <tr><td colspan="4" class="text-muted">Nothing scheduled after today.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endif %}
+
+<a class="button button-filled" href="{% url 'week_calendar' %}">Week view</a>
+{% endblock %}

@@ -1,0 +1,8 @@
+{% load core_tags %}
+{% comment %}
+Status badge for one appointment: icon + label + fill style (never colour
+alone). Reads STATUS_META through the model; no status strings here.
+{% endcomment %}
+<span class="badge badge-{{ appt.status_meta.variant }}">
+  {% icon appt.status_meta.icon %} {{ appt.get_status_display }}
+</span>

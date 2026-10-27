@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% load core_tags %}
+{% block title %}Schedules{% endblock %}
+{% block content %}
+<header class="page-head">
+  <h1>Doctor schedules</h1>
+  {% if can_manage %}<a class="button button-filled" href="{% url 'schedule_add' %}">Add schedule</a>{% endif %}
+</header>
+
+<section class="surface card-pad">
+  <h2>Weekly availability</h2>
+  <table class="table">
+    <thead><tr><th>Doctor</th><th>Weekday</th><th>Hours</th><th>Slot length</th><th>Status</th><th>{% if can_manage %}Manage{% endif %}</th></tr></thead>
+    <tbody>
+      {% for s in schedules %}
+      <tr>
+        <td>{{ s.doctor.full_name }}</td>
+        <td>{{ s.get_weekday_display }}</td>
+        <td>{{ s.start_time|time:'H:i' }}–{{ s.end_time|time:'H:i' }}</td>
+        <td>{{ s.slot_minutes }} min</td>
+        <td>
+          {% if s.is_active %}{% include "components/badge.html" with variant="done" label="Active" %}
+          {% else %}{% include "components/badge.html" with variant="pending" label="Removed" %}{% endif %}
+        </td>
+        <td>
+          {% if can_manage %}
+            <a class="button button-outlined" href="{% url 'schedule_edit' s.pk %}">Edit</a>
+            {% if s.is_active %}
+            <form method="post" action="{% url 'schedule_remove' s.pk %}">{% csrf_token %}
+              <button type="submit" class="button button-tonal">Remove</button>
+            </form>
+            {% endif %}
+          {% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6">{% include "components/empty.html" with icon_name="clock" title="No schedules yet" hint="Add a doctor's weekly availability before booking." %}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="surface card-pad">
+  <h2>Leave windows</h2>
+  {% if can_manage %}<a class="button button-tonal" href="{% url 'leave_add' %}">Record leave</a>{% endif %}
+  <table class="table">
+    <thead><tr><th>Doctor</th><th>From</th><th>To</th><th>Reason</th><th>{% if can_manage %}Manage{% endif %}</th></tr></thead>
+    <tbody>
+      {% for leave in leaves %}
+      <tr>
+        <td>{{ leave.doctor.full_name }}</td>
+        <td>{{ leave.start_date|date:'Y-m-d' }}</td>
+        <td>{{ leave.end_date|date:'Y-m-d' }}</td>
+        <td>{{ leave.reason|default:"—"|truncatechars:40 }}</td>
+        <td>
+          {% if can_manage and leave.is_active %}
+          <form method="post" action="{% url 'leave_remove' leave.pk %}">{% csrf_token %}
+            <button type="submit" class="button button-tonal">Remove</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5" class="text-muted">No leave recorded.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

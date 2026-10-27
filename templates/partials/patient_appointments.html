@@ -1,0 +1,22 @@
+{% load core_tags %}
+{% comment %}
+Appointment rows for one patient. Context: history (appointments for the
+patient), can_view (appointment.view) or doctor with view_own sees it.
+{% endcomment %}
+{% if history %}
+  <table class="table">
+    <thead><tr><th>Code</th><th>When</th><th>Doctor</th><th>Status</th></tr></thead>
+    <tbody>
+      {% for appt in history %}
+        <tr>
+          <td><span class="chip">{{ appt.appointment_code }}</span></td>
+          <td>{{ appt.scheduled_start|date:"Y-m-d H:i" }}</td>
+          <td>{{ appt.doctor.full_name }}</td>
+          <td>{% include "components/appointment_status.html" with appt=appt %}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  {% include "components/empty.html" with icon_name="calendar" title="No appointments yet" hint="Use Book appointment above." %}
+{% endif %}

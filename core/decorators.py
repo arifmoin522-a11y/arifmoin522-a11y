@@ -55,6 +55,39 @@ def permission_required_code(code: str) -> Callable:
     return decorator
 
 
+def permission_required_any(*codes: str) -> Callable:
+    """Function-view decorator enforcing ANY of the given permission codes."""
+
+    def decorator(view_func: Callable) -> Callable:
+        @functools.wraps(view_func)
+        def _wrapped(request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+            from django.contrib.auth.views import redirect_to_login
+
+            try:
+                if not request.user.is_authenticated:
+                    raise LoginNeeded(request)
+                if not any(
+                    user_has_permission(request.user, code, request=request)
+                    for code in codes
+                ):
+                    log_to_audit(
+                        user=request.user,
+                        action=AuditLog.Action.PERMISSION_DENIED,
+                        request=request,
+                        object_type="view",
+                        object_id=request.path,
+                        details=f"Missing permission: any of {', '.join(codes)}",
+                    )
+                    raise PermissionDenied
+            except LoginNeeded:
+                return redirect_to_login(request.get_full_path())
+            return view_func(request, *args, **kwargs)
+
+        return _wrapped
+
+    return decorator
+
+
 class PermissionRequiredMixin:
     """Class-based-view mixin enforcing ``permission_code``."""
 

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load core_tags %}
+{% block title %}Week view{% endblock %}
+{% block content %}
+<header class="page-head">
+  <h1>Week view</h1>
+  <nav class="date-nav" aria-label="Week navigation">
+    <a class="button button-tonal" href="?week={{ prev_week|date:'Y-m-d' }}">Previous week</a>
+    <a class="button button-tonal" href="?week={{ next_week|date:'Y-m-d' }}">Next week</a>
+  </nav>
+</header>
+<div class="surface table-wrap">
+  <table class="table week-grid">
+    <thead>
+      <tr>
+        <th>Doctor</th>
+        {% for day in week %}<th scope="col">{{ day|date:'D d.m' }}</th>{% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in grid %}
+      <tr>
+        <th scope="row">{{ row.doctor.full_name }}</th>
+        {% for cell in row.cells %}
+        <td class="week-cell{% if cell.appts %} has-appts{% endif %}">
+          {% for appt in cell.appts %}
+            <a class="week-appt" href="{% url 'appointment_detail' appt.pk %}">
+              <span class="chip">{{ appt.patient.patient_code }}</span>
+              {{ appt.scheduled_start|date:'H:i' }}
+              {% include "components/badge.html" with variant=appt.status_meta.variant label=appt.get_status_display %}
+            </a>
+          {% empty %}<span class="cell-empty">—</span>
+          {% endfor %}
+        </td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% if full_view %}<a class="button button-filled" href="{% url 'appointment_book' %}">Book appointment</a>{% else %}<p class="text-muted">You see only your own rows; the front desk books on your behalf.</p>{% endif %}
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load core_tags %}
+{% block title %}Record leave{% endblock %}
+{% block content %}
+<header class="page-head">
+  <a class="link back" href="{% url 'schedule_list' %}">Back to schedules</a>
+  <h1>Record doctor leave</h1>
+</header>
+<section class="surface card-pad">
+  {% if form.errors %}{% include "components/alert.html" with kind="error" text="Please review the highlighted fields." %}{% endif %}
+  <form method="post" class="form-stack" novalidate>
+    {% csrf_token %}
+    <div class="form-row">
+      {% include "components/field.html" with field=form.doctor %}
+      {% include "components/field.html" with field=form.start_date %}
+      {% include "components/field.html" with field=form.end_date %}
+    </div>
+    {% include "components/field.html" with field=form.reason %}
+    <p class="text-muted">Booked slots inside a leave window stay untouched; they simply stop being offered afterwards.</p>
+    <div class="actions">
+      <a class="button button-outlined" href="{% url 'schedule_list' %}">Back</a>
+      <button type="submit" class="button button-filled">Save leave</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

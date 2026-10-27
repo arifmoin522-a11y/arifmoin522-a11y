@@ -104,6 +104,7 @@ ul[id^="id_permissions"] li { display: grid; grid-template-columns: auto 1fr; al
 
 .form-stack { display: grid; gap: 16px; align-content: start; }
 .form-stack .field { margin: 0; }
+.form-row { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
 .section-title { border-top: 1px solid var(--border); padding-top: 16px; font-size: var(--fs-20); }
 
 /* ---------------------------------------------------------------- badges */
@@ -337,3 +338,41 @@ details.modal > summary { cursor: pointer; list-style: none; }
 .style-block { max-width: 720px; }
 .style-block h2 { margin-bottom: 16px; }
 .style-block .field, .style-block h1, .style-block p + p { margin-top: 12px; }
+
+/* ---- date navigation strip ------------------------------------------------ */
+.date-nav{display:flex;gap:var(--space-2);flex-wrap:wrap}
+
+/* ---- headline counts ------------------------------------------------------ */
+.counts-strip{display:flex;gap:var(--space-2);flex-wrap:wrap;margin-bottom:var(--space-4)}
+.counts-strip .chip{display:inline-flex}
+
+/* ---- appointment tables ---------------------------------------------------- */
+.row-actions{display:flex;gap:var(--space-2);flex-wrap:wrap;align-items:center}
+.row-actions form{display:inline-flex}
+.actions-head{text-align:left}
+.queue-number{font-weight:var(--font-weight-bold,700)}
+.book-cta{margin-top:var(--space-2);font-size:var(--font-size-sm,.8rem)}
+
+/* ---- slot / booking grids -------------------------------------------------- */
+.slot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:var(--space-2)}
+.slot-button{display:inline-flex;align-items:center;justify-content:center;padding:.45rem .5rem;border:1px solid var(--border);border-radius:var(--radius-md,8px);background:var(--surface);color:var(--ink);text-decoration:none}
+.slot-button:hover{border-color:var(--brand)}
+.slot-pick-forms{margin-top:var(--space-2)}
+
+/* ---- week grid ------------------------------------------------------------- */
+.table-wrap{overflow-x:auto}
+.week-grid td,.week-grid th{vertical-align:top;min-width:6.5rem}
+.week-cell{min-height:3rem}
+.week-cell.has-appts{border-left:2px solid var(--brand)}
+.week-appt{display:block;padding:.25rem 0;text-decoration:none;color:inherit}
+.week-appt:hover{background:var(--surface-raised,var(--surface))}
+.cell-empty{color:var(--ink-faint,var(--muted))}
+
+/* ---- detail lists & light modals ------------------------------------------ */
+.detail-list{list-style:none;padding:0;margin:0}
+.detail-list li{display:flex;gap:1rem;justify-content:space-between;padding:.35rem 0;border-bottom:1px dashed var(--border)}
+.detail-list li:last-child{border-bottom:0}
+.modal-lite{margin-top:var(--space-3)}
+.modal-lite summary{list-style:none;cursor:pointer;display:inline-flex}
+.modal-lite summary::-webkit-details-marker{display:none}
+.modal-lite-body{margin-top:var(--space-3);padding-top:var(--space-3);border-top:1px solid var(--border)}

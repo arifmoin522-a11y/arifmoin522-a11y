@@ -49,6 +49,8 @@ LOCAL_APPS = [
     "core",
     "apps.accounts",
     "apps.audit",
+    "apps.patients",
+    "apps.appointments",
 ]
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
@@ -127,16 +129,28 @@ SESSION_COOKIE_AGE = env.int("SESSION_IDLE_TIMEOUT", default=1800)
 SESSION_SAVE_EVERY_REQUEST = True  # refresh age on activity => expiry on inactivity
 LOGIN_FAILURE_LIMIT = env.int("LOGIN_FAILURE_LIMIT", default=5)
 LOGIN_LOCKOUT_SECONDS = env.int("LOGIN_LOCKOUT_SECONDS", default=300)
-MAX_DASHBOARD_CARDS = env.int("MAX_DASHBOARD_CARDS", default=5)
+MAX_DASHBOARD_CARDS = env.int("MAX_DASHBOARD_CARDS", default=8)
 LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "dashboard"
 LOGOUT_REDIRECT_URL = "login"
+
+# FRONT DESK (Phase 2) — code generation, forms, booking and display tuning
+TIME_ZONE = env.str("TIME_ZONE", default="UTC")
+PATIENT_CODE_PREFIX = env.str("PATIENT_CODE_PREFIX", default="PAT")
+APPOINTMENT_CODE_PREFIX = env.str("APPOINTMENT_CODE_PREFIX", default="APT")
+CODE_SEQUENCE_DIGITS = env.int("CODE_SEQUENCE_DIGITS", default=6)
+CODE_SEQUENCE_START = env.int("CODE_SEQUENCE_START", default=1)
+PHONE_REGEX = env.str("PHONE_REGEX", default=r"^\+?[0-9][0-9\- ]{6,19}$")
+PAGE_SIZE = env.int("PAGE_SIZE", default=15)
+APPOINTMENT_SLOT_MINUTES = env.int("APPOINTMENT_SLOT_MINUTES", default=30)
+APPOINTMENT_CANCELLATION_WINDOW_MINUTES = env.int(
+    "APPOINTMENT_CANCELLATION_WINDOW_MINUTES", default=120
+)
 
 X_FRAME_OPTIONS = "DENY"
 
 # I18N
 LANGUAGE_CODE = "en-us"
-TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 

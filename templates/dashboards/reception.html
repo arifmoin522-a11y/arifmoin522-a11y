@@ -13,4 +13,15 @@
   </div>
 </section>
 {% include "partials/dashboard_cards.html" %}
+{% if desk_stats %}
+<section class="surface card-pad front-desk-stats">
+  <h2>Today at the desk</h2>
+  <div class="counts-strip">
+    <span class="chip">{% icon "calendar" %} {{ desk_stats.today }} active today</span>
+    <span class="chip">{% icon "check" %} {{ desk_stats.checked_in }} checked in</span>
+    <span class="chip">{% icon "clock" %} {{ desk_stats.waiting }} waiting</span>
+    <span class="chip">{% icon "history" %} {{ desk_stats.completed }} completed</span>
+  </div>
+</section>
+{% endif %}
 {% endblock %}

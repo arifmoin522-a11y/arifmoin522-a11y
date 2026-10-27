@@ -16,6 +16,7 @@ class AuditLog(models.Model):
         LOGOUT = "LOGOUT", "Logout"
         LOGIN_FAILED = "LOGIN_FAILED", "Failed login"
         LOGIN_LOCKED = "LOGIN_LOCKED", "Login locked out"
+        VIEW = "VIEW", "Viewed"
         CREATE = "CREATE", "Create"
         UPDATE = "UPDATE", "Update"
         DELETE = "DELETE", "Delete"

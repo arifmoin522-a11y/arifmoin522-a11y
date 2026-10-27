@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% load core_tags %}
+{% block title %}{% if adding %}Register patient{% else %}Edit {{ patient.full_name }}{% endif %}{% endblock %}
+{% block content %}
+<header class="page-head">
+  {% if adding %}
+    <a class="link back" href="{% url 'patient_list' %}">Back to patients</a>
+    <h1>Register patient</h1>
+  {% else %}
+    <a class="link back" href="{% url 'patient_detail' patient.pk %}">Back to patient</a>
+    <h1>Edit {{ patient.full_name }}</h1>
+    <p class="eyebrow">{{ patient.patient_code }}</p>
+  {% endif %}
+</header>
+
+{% if duplicates %}
+{% include "components/alert.html" with kind="warning" text="Possible duplicate found — check before continuing." %}
+<section class="surface card-pad">
+  <h2>Patients with the same name, date of birth and phone</h2>
+  <table class="table">
+    <thead><tr><th>Code</th><th>Name</th><th>Date of birth</th><th></th></tr></thead>
+    <tbody>
+      {% for dup in duplicates %}
+        <tr>
+          <td><span class="chip">{{ dup.patient_code }}</span></td>
+          <td>{{ dup.full_name }}</td>
+          <td>{{ dup.date_of_birth|date:"Y-m-d" }}</td>
+          <td><a class="link" href="{% url 'patient_detail' dup.pk %}">Open record</a></td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <form method="post" class="actions">
+    {% csrf_token %}
+    <button type="submit" name="override" value="1" class="button button-tonal">Not a duplicate — register anyway</button>
+    <button type="submit" class="button button-outlined">Go back and edit</button>
+  </form>
+</section>
+{% endif %}
+
+<form class="surface card-pad form-stack" method="post" novalidate>
+  {% csrf_token %}
+  <h2>{% if adding %}Demographics{% else %}Demographics {% if not can_edit %}{% endif %}{% endif %}</h2>
+  <div class="form-row">
+    {% include "components/field.html" with field=form.first_name %}
+    {% include "components/field.html" with field=form.last_name %}
+    {% include "components/field.html" with field=form.date_of_birth %}
+  </div>
+  <div class="form-row">
+    {% include "components/field.html" with field=form.gender %}
+    {% include "components/field.html" with field=form.phone %}
+    {% include "components/field.html" with field=form.email %}
+  </div>
+  <details {% if form.address.value or form.city.value or form.state.value or form.postal_code.value %}open{% endif %}>
+    <summary>More details</summary>
+    <div class="form-row">
+      {% include "components/field.html" with field=form.address %}
+      {% include "components/field.html" with field=form.city %}
+      {% include "components/field.html" with field=form.state %}
+      {% include "components/field.html" with field=form.postal_code %}
+    </div>
+  </details>
+  <details>
+    <summary>Clinical notes</summary>
+    <div class="form-row">
+      {% include "components/field.html" with field=form.blood_group %}
+      {% include "components/field.html" with field=form.known_allergies %}
+    </div>
+  </details>
+  <div class="actions">
+    <button type="submit" class="button button-filled">{% if adding %}Register{% else %}Save changes{% endif %}</button>
+    {% if adding %}
+      <a class="button button-outlined" href="{% url 'patient_list' %}">Cancel</a>
+    {% else %}
+      <a class="button button-outlined" href="{% url 'patient_detail' patient.pk %}">Cancel</a>
+    {% endif %}
+  </div>
+</form>
+{% endblock %}

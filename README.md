@@ -1,14 +1,18 @@
-# Hospital ERP — Phase 1
+# Hospital ERP — Phase 2
 
-Django-based hospital management system. **Phase 1** delivers the shared
+Django-based hospital management system. **Phase 1** delivered the shared
 foundation: email-based authentication with lockout, role-based access
 control (RBAC), user/staff/department management with soft deletes, a
 per-role dashboard, and an append-only audit trail — all behind a custom
-monochrome design system.
+monochrome design system. **Phase 2** adds the front desk: patient
+registration with duplicate checks and private contact masking, the 4-step
+appointment booking flow with offered-slot modelling (schedules, leave,
+conflicts), a server-enforced appointment state machine, doctor schedules
+and leave management, and audit logging including VIEW entries.
 
-Clinical modules (patients, appointments, admissions, pharmacy, billing) are
-registered as permissions and appear on dashboards as disabled placeholders;
-they are not implemented yet — see
+Later modules (admissions, pharmacy, billing) remain registered as
+permissions and appear on dashboards as disabled placeholders; they are not
+implemented yet — see
 [Adding a module beyond Phase 1](#adding-a-module-beyond-phase-1).
 
 ## Table of contents
@@ -117,6 +121,9 @@ record. Demo emails are fake on purpose (`<name>@example.test`):
 | ------------------------------ | -------------- | --------- |
 | `admin@example.test`           | Super Admin    | yes       |
 | `doctor@example.test`          | Doctor         | no        |
+| `doctor.emergency@example.test`| Doctor         | no        |
+| `doctor.pediatrics@example.test`| Doctor        | no        |
+| `doctor.radiology@example.test`| Doctor         | no        |
 | `nurse@example.test`           | Nurse          | no        |
 | `reception@example.test`       | Receptionist   | no        |
 | `pharmacist@example.test`      | Pharmacist     | no        |
@@ -124,7 +131,11 @@ record. Demo emails are fake on purpose (`<name>@example.test`):
 | `accountant@example.test`      | Accountant     | no        |
 
 Seeded departments: Emergency, Internal Medicine, Pediatrics, Radiology,
-Administration.
+Administration. `seed_demo_front_desk` adds 30 clearly-fake patients
+(`PAT-000021` …), weekly schedules for the four doctors, a 30-day leave
+window for the radiologist and 30 demo appointments with mixed statuses.
+It is idempotent, uses a fixed random seed and refuses to run unless
+`DEBUG=True`.
 
 ## Roles and permissions
 
@@ -136,16 +147,20 @@ test codes like `{% if "user.view" in user_permissions %}`.
 | Role           | Dashboard template         | Permission codes                                      |
 | -------------- | -------------------------- | ----------------------------------------------------- |
 | Super Admin    | `dashboards/admin.html`    | all codes (plus superuser bypass in the helper)       |
-| Doctor         | `dashboards/clinical.html` | `department.view`, `staff.view`                       |
-| Nurse          | `dashboards/clinical.html` | `staff.view`                                          |
-| Receptionist   | `dashboards/reception.html`| `department.view`                                     |
+| Doctor         | `dashboards/clinical.html` | `department.view`, `staff.view`, `patient.view`, `appointment.view_own`, `schedule.view` |
+| Nurse          | `dashboards/clinical.html` | `staff.view`, `patient.view`, `appointment.view`, `appointment.checkin` |
+| Receptionist   | `dashboards/reception.html`| `department.view`, `patient.view/view_contact/create/update`, `appointment.view/create/cancel/checkin/reschedule`, `schedule.view` |
 | Pharmacist     | `dashboards/pharmacy.html` | —                                                     |
 | Lab Technician | `dashboards/lab.html`      | —                                                     |
 | Accountant     | `dashboards/finance.html`  | `audit.view`, `department.view`                       |
 
 Full code list: `user.view/create/edit/delete`, `role.view/create/edit/
 delete`, `department.view/edit`, `staff.view/edit`, `audit.view`,
-`styleguide.view` (superusers only).
+`styleguide.view` (superusers only), plus the Phase 2 front-desk codes
+`patient.view`, `patient.view_contact`, `patient.create`, `patient.update`,
+`patient.delete`, `appointment.view`, `appointment.view_own`,
+`appointment.create`, `appointment.cancel`, `appointment.checkin`,
+`appointment.reschedule`, `schedule.view`, `schedule.manage`.
 
 Each dashboard template renders whatever cards the user's permissions
 admit, capped by `MAX_DASHBOARD_CARDS`; templates come from the
@@ -167,6 +182,14 @@ All routes live in `apps/accounts/urls.py`:
 | `/departments/` …        | `department_*`   | `department.view` / `.edit`       |
 | `/audit/`                | `audit_list`     | `audit.view`                      |
 | `/styleguide/`           | `styleguide`     | superuser only                    |
+| `/patients/` …           | `patient_*`      | `patient.view/create/update/delete` |
+| `/patients/<pk>/contacts/add/`, `/contacts/<pk>/primary/` | `contact_*` | `patient.update` (+ `patient.view_contact`) |
+| `/appointments/` …       | `appointment_*`  | `appointment.view` / `view_own` etc. |
+| `/appointments/week/`    | `week_calendar`  | `appointment.view` or `view_own`  |
+| `/schedules/` …          | `schedule_*`     | `schedule.view` / `schedule.manage` |
+
+Phase 2 routes live in `apps/patients/urls.py` and `apps/appointments/urls.py`;
+Phase 1 routes stay in `apps/accounts/urls.py`.
 
 User and role deletes are **soft** (`is_deleted=True`); the `ActiveManager`
 hides deleted rows everywhere, including Django admin.
@@ -194,10 +217,46 @@ hides deleted rows everywhere, including Django admin.
 Every record carries actor, action, object type + id + repr, reason,
 change note, and client IP, captured via `AuditContextMiddleware`
 (`request.client_ip`) and `apps/audit/utils.log_to_audit`. Current actions:
-`LOGIN`, `LOGOUT`, `LOGIN_FAILED`, `LOGIN_LOCKED`, `CREATE`, `UPDATE`,
-`DELETE`, `PERMISSION_DENIED`.
+`LOGIN`, `LOGOUT`, `LOGIN_FAILED`, `LOGIN_LOCKED`, `VIEW`, `CREATE`,
+`UPDATE`, `DELETE`, `PERMISSION_DENIED`.
+
+## Phase 2 — front desk (patients & appointments)
+
+**Patients (`apps/patients/`)**
+
+- Registration form searches for duplicates (same name + DOB + phone)
+  before persisting; the receptionist can override with one click.
+- Automatic unique `PAT-#######` codes from `core.models.CodeSequence`
+  (`select_for_update` serialises every allocation).
+- Emergency contacts: one primary per patient enforced inside services
+  (`make_contact_primary` cascades the flag off the old primary).
+- Phone privacy: `patient.view_contact` decides `display_phone`;
+  viewers without it see only the last 3 digits (`mask` template filter).
+- Live search stores the term in the session after a POST (never in URLs).
+
+**Appointments (`apps/appointments/`)**
+
+- Offered slots are computed: doctor's `DoctorSchedule` for that weekday
+  minus `DoctorLeave` windows, existing ACTIVE appointments and past times.
+- Booking is a 4-step flow — patient → doctor → day → slot → confirm —
+  and re-validates the slot at booking time.
+- State machine (`constants.TRANSITIONS`):
+  `SCHEDULED → CHECKED_IN → IN_PROGRESS → COMPLETED`, from `SCHEDULED` or
+  `CHECKED_IN` also `CANCELLED` / `NO_SHOW`; terminal statuses accept
+  nothing further.
+- Cancellations are blocked inside a configurable last-N-minutes window
+  (`APPOINTMENT_CANCELLATION_WINDOW_MINUTES`, default 120) and require a
+  reason; rescheduling cancels the old record with its reason and books a
+  new one linked via `rescheduled_from` (no data changes, full history).
+- Check-in assigns per-doctor, per-day queue numbers; the appointment code
+  sequence row lock also serialises concurrent bookings.
+- Doctors hold `appointment.view_own` and see only their own rows; the
+  backend also 404s rows outside their scope.
 
 ## Architecture rules
+
+0. **No status strings in templates** — badges read `STATUS_META`/display
+   names off the model; transitions are checked by `can_transition_to`.
 
 1. **One permission vocabulary** — codes only in `core/permissions.py`;
    everything else imports, never redefining.
@@ -217,14 +276,19 @@ change note, and client IP, captured via `AuditContextMiddleware`
 ## Tests
 
 ```bash
-venv/bin/python manage.py test     # 37 tests
+venv/bin/python manage.py test     # 59 tests
 ```
 
 Coverage: user manager + email normalisation, soft delete + managers,
 permission allow/deny/superuser bypass, login success/failure/lockout
 auditing, per-role dashboard routing, sidebar filtering, seed idempotency
 and the DEBUG guard, audit append-only, registry URL wiring, lockout helper
-units, and case-insensitive email login.
+units, and case-insensitive email login. Phase 2 adds patient codes and
+future-DOB validation, primary-contact cascading, duplicate lookup, phone
+masking by permission, slot modelling (schedule/leave/conflicts), the
+appointment state machine with queue numbers, the cancellation window,
+reschedule linkage, and 403 backend enforcement for booking and
+schedule-manage screens.
 
 ## Running in production
 

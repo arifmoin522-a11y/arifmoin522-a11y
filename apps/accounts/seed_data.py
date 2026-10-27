@@ -20,19 +20,42 @@ ROLES: list[dict] = [
         "name": "Doctor",
         "description": "Clinical staff; will own patients, appointments and clinical modules.",
         "dashboard_template": "dashboards/clinical.html",
-        "permissions": [p.DEPARTMENT_VIEW, p.STAFF_VIEW],
+        "permissions": [
+            p.DEPARTMENT_VIEW,
+            p.STAFF_VIEW,
+            p.PATIENT_VIEW,
+            p.APPOINTMENT_VIEW_OWN,
+            p.SCHEDULE_VIEW,
+        ],
     },
     {
         "name": "Nurse",
         "description": "Ward staff; will own wards and clinical records.",
         "dashboard_template": "dashboards/clinical.html",
-        "permissions": [p.STAFF_VIEW],
+        "permissions": [
+            p.STAFF_VIEW,
+            p.PATIENT_VIEW,
+            p.APPOINTMENT_VIEW,
+            p.APPOINTMENT_CHECKIN,
+        ],
     },
     {
         "name": "Receptionist",
         "description": "Front desk; will own registration and scheduling.",
         "dashboard_template": "dashboards/reception.html",
-        "permissions": [p.DEPARTMENT_VIEW],
+        "permissions": [
+            p.DEPARTMENT_VIEW,
+            p.PATIENT_VIEW,
+            p.PATIENT_VIEW_CONTACT,
+            p.PATIENT_CREATE,
+            p.PATIENT_UPDATE,
+            p.APPOINTMENT_VIEW,
+            p.APPOINTMENT_CREATE,
+            p.APPOINTMENT_CANCEL,
+            p.APPOINTMENT_CHECKIN,
+            p.APPOINTMENT_RESCHEDULE,
+            p.SCHEDULE_VIEW,
+        ],
     },
     {
         "name": "Pharmacist",
@@ -62,6 +85,9 @@ DEPARTMENTS: list[dict] = [
     {"name": "Administration", "description": "Back office, HR and finance"},
 ]
 
+# Extra fake doctors (one per extra department) so every department has a
+# schedule-capable user for the front-desk demo. They are regular USERS
+# entries, so seed_users keeps creating them idempotently.
 USERS: list[dict] = [
     {
         "email": "admin@example.test",
@@ -125,5 +151,32 @@ USERS: list[dict] = [
         "is_staff": False,
         "department": "Administration",
         "license_no": "",
+    },
+    {
+        "email": "doctor.emergency@example.test",
+        "full_name": "Evan Emergency",
+        "role": "Doctor",
+        "is_superuser": False,
+        "is_staff": False,
+        "department": "Emergency",
+        "license_no": "DOC-0002",
+    },
+    {
+        "email": "doctor.pediatrics@example.test",
+        "full_name": "Petra Pediatrics",
+        "role": "Doctor",
+        "is_superuser": False,
+        "is_staff": False,
+        "department": "Pediatrics",
+        "license_no": "DOC-0003",
+    },
+    {
+        "email": "doctor.radiology@example.test",
+        "full_name": "Ronan Radiology",
+        "role": "Doctor",
+        "is_superuser": False,
+        "is_staff": False,
+        "department": "Radiology",
+        "license_no": "DOC-0004",
     },
 ]

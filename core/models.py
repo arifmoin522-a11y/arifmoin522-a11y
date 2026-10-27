@@ -52,3 +52,34 @@ class BaseModel(models.Model):
         raise NotImplementedError(
             "Hard delete is disabled — use soft_delete() instead."
         )
+
+
+class CodeSequence(models.Model):
+    """Monotonic counter used for human codes (PAT-000123, APT-000456).
+
+    Incremented inside the caller's transaction, so allocated numbers are
+    unique and gap-free enough (gaps only if a transaction rolls back —
+    acceptable for codes). Never derive values with ``max()+1``.
+    """
+
+    name = models.CharField(max_length=64, unique=True)
+    value = models.BigIntegerField(default=0)
+
+    def __str__(self) -> str:
+        return f"{self.name}={self.value}"
+
+
+def next_sequence_value(name: str, *, start: int = 1) -> int:
+    """Allocate the next value for ``name`` inside the current transaction.
+
+    Must be called from within ``transaction.atomic``. Uses
+    ``select_for_update`` on databases that support row locking (PostgreSQL);
+    on SQLite the surrounding atomic block already serialises writes.
+    """
+    row = CodeSequence.objects.select_for_update().filter(name=name).first()
+    if row is None:
+        row = CodeSequence(name=name, value=start)
+    else:
+        row.value += 1
+    row.save()
+    return row.value

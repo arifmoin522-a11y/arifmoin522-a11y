@@ -27,6 +27,22 @@ STAFF_EDIT = "staff.edit"
 AUDIT_VIEW = "audit.view"
 STYLEGUIDE_VIEW = "styleguide.view"  # superuser convenience; never granted to roles
 
+# Phase 2 (front desk). The doctor-capable check for DoctorSchedule/Appointment
+# doctor pickers uses APPOINTMENT_VIEW_OWN, never a role-name string.
+PATIENT_VIEW = "patient.view"
+PATIENT_VIEW_CONTACT = "patient.view_contact"
+PATIENT_CREATE = "patient.create"
+PATIENT_UPDATE = "patient.update"
+PATIENT_DELETE = "patient.delete"
+APPOINTMENT_VIEW = "appointment.view"
+APPOINTMENT_VIEW_OWN = "appointment.view_own"
+APPOINTMENT_CREATE = "appointment.create"
+APPOINTMENT_CANCEL = "appointment.cancel"
+APPOINTMENT_CHECKIN = "appointment.checkin"
+APPOINTMENT_RESCHEDULE = "appointment.reschedule"
+SCHEDULE_VIEW = "schedule.view"
+SCHEDULE_MANAGE = "schedule.manage"
+
 #: code -> human description, consumed by the seed_roles management command
 PERMISSION_DESCRIPTIONS: dict[str, str] = {
     USER_VIEW: "View user accounts",
@@ -43,6 +59,19 @@ PERMISSION_DESCRIPTIONS: dict[str, str] = {
     STAFF_EDIT: "Edit staff profiles",
     AUDIT_VIEW: "View the audit log",
     STYLEGUIDE_VIEW: "Open the UI styleguide (superusers only)",
+    PATIENT_VIEW: "View patient demographics",
+    PATIENT_VIEW_CONTACT: "See full phone/contact details of patients",
+    PATIENT_CREATE: "Register new patients",
+    PATIENT_UPDATE: "Edit patient records",
+    PATIENT_DELETE: "Archive patients (soft delete)",
+    APPOINTMENT_VIEW: "View the full appointment calendar and queue",
+    APPOINTMENT_VIEW_OWN: "View own (doctor's) appointments only",
+    APPOINTMENT_CREATE: "Book appointments",
+    APPOINTMENT_CANCEL: "Cancel appointments and mark no-shows",
+    APPOINTMENT_CHECKIN: "Check patients in and progress visits",
+    APPOINTMENT_RESCHEDULE: "Reschedule appointments",
+    SCHEDULE_VIEW: "View doctor schedules and leave",
+    SCHEDULE_MANAGE: "Create and edit doctor schedules and leave",
 }
 
 

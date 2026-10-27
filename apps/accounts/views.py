@@ -28,6 +28,8 @@ from core.permissions import (
     ROLE_DELETE,
     ROLE_EDIT,
     ROLE_VIEW,
+    APPOINTMENT_VIEW,
+    APPOINTMENT_VIEW_OWN,
     STAFF_VIEW,
     STYLEGUIDE_VIEW,
     USER_CREATE,
@@ -130,7 +132,14 @@ def dashboard(request: Any):
         get_template(template_name)
     except TemplateDoesNotExist:
         template_name = "dashboards/generic.html"
-    return render(request, template_name, {"role": role})
+    context = {"role": role, "desk_stats": None}
+    if user_has_permission(
+        request.user, APPOINTMENT_VIEW, request=request
+    ) or user_has_permission(request.user, APPOINTMENT_VIEW_OWN, request=request):
+        from apps.appointments.selectors import dashboard_counts
+
+        context["desk_stats"] = dashboard_counts(request.user, request=request)
+    return render(request, template_name, context)
 
 
 def _log_write(

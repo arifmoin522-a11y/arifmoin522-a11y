@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% load core_tags %}
+{% block title %}Book appointment{% endblock %}
+{% block content %}
+<header class="page-head">
+  <a class="link back" href="{% url 'appointment_list' %}">Back to schedule</a>
+  <h1>Book appointment</h1>
+</header>
+
+{% if step == "patient" %}
+  <p class="text-muted">Find the patient record first; appointments always attach to a patient.</p>
+  <form class="toolbar" method="post" role="search">
+    {% csrf_token %}
+    <div class="searchfield">
+      {% icon "search" %}
+      <input type="search" name="patient_q" value="{{ patient_q }}" placeholder="Name, phone or patient code" aria-label="Search patients">
+    </div>
+    <button type="submit" class="button button-tonal">Search</button>
+  </form>
+  <div class="surface">
+    <table class="table">
+      <thead><tr><th>Code</th><th>Name</th><th></th></tr></thead>
+      <tbody>
+        {% for p in patient_matches %}
+        <tr>
+          <td><span class="chip">{{ p.patient_code }}</span></td>
+          <td>{{ p.full_name }}</td>
+          <td><a class="button button-outlined" href="?patient={{ p.pk }}">Select</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="3">{% include "components/empty.html" with icon_name="person" title="No patient matches" hint="Register the patient first from the dashboard." %}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+{% elif step == "doctor" %}
+  <p class="text-muted">Patient: <span class="chip">{{ patient.patient_code }}</span> {{ patient.full_name }}. Pick the doctor.</p>
+  <div class="surface">
+    <table class="table">
+      <thead><tr><th>Doctor</th><th>Department</th><th></th></tr></thead>
+      <tbody>
+        {% for d in doctors %}
+        <tr>
+          <td>{{ d.full_name }}</td>
+          <td><span class="chip">{% if d.is_active %}Active{% else %}Inactive{% endif %}</span></td>
+          <td><a class="button button-outlined" href="?patient={{ patient.pk }}&amp;doctor={{ d.pk }}">Select</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+{% elif step == "date" %}
+  <p class="text-muted">Patient <span class="chip">{{ patient.patient_code }}</span> with {{ doctor.full_name }}. Choose a day.</p>
+  <form method="get" class="toolbar">
+    <input type="hidden" name="patient" value="{{ patient.pk }}">
+    <input type="hidden" name="doctor" value="{{ doctor.pk }}">
+    <div class="searchfield">
+      {% icon "calendar" %}
+      <input type="date" name="date" min="{{ min_date|date:'Y-m-d' }}" value="{{ min_date|date:'Y-m-d' }}" aria-label="Appointment date">
+    </div>
+    <button type="submit" class="button button-filled">Show slots</button>
+  </form>
+
+{% elif step == "slot" %}
+  <p class="text-muted">{{ doctor.full_name }} on {{ day|date:'Y-m-d' }}.</p>
+  {% include "components/alert.html" with kind="info" text="Only slots inside this doctor's schedule are listed; leave days and booked slots are removed automatically." %}
+  {% if no_slots %}
+    {% include "components/empty.html" with icon_name="calendar" title="No open slots that day" hint="Leave days and booked times are hidden. Try another day." %}
+  {% endif %}
+  <div class="slot-grid">
+    {% for s in slots %}
+      <a class="slot-button" href="?patient={{ patient.pk }}&amp;doctor={{ doctor.pk }}&amp;date={{ day|date:'Y-m-d' }}&amp;slot={{ s.start|date:'Hi' }}">{{ s.start|date:'H:i' }}</a>
+    {% endfor %}
+  </div>
+
+{% elif step == "confirm" %}
+  <section class="surface card-pad">
+    <h2>Confirm appointment</h2>
+    <ul class="detail-list">
+      <li><span>Patient</span> <strong><span class="chip">{{ patient.patient_code }}</span> {{ patient.full_name }}</strong></li>
+      <li><span>Doctor</span> <strong>{{ doctor.full_name }}</strong></li>
+      <li><span>When</span> <strong>{{ day|date:'Y-m-d' }} {{ slot_time|date:'H:i' }}</strong></li>
+    </ul>
+    {% if form.errors %}{% include "components/alert.html" with kind="error" text="Please review the highlighted fields." %}{% endif %}
+    <form method="post" class="form-stack" novalidate>
+      {% csrf_token %}
+      {% include "components/field.html" with field=form.reason %}
+      {% include "components/field.html" with field=form.department %}
+      <p class="text-muted">The system re-checks the slot at booking time: if someone took it first, you'll be asked to pick another.</p>
+      <div class="actions">
+        <a class="button button-outlined" href="?patient={{ patient.pk }}&amp;doctor={{ doctor.pk }}&amp;date={{ day|date:'Y-m-d' }}">Back to slots</a>
+        <button type="submit" class="button button-filled">Book appointment</button>
+      </div>
+    </form>
+  </section>
+{% endif %}
+{% endblock %}

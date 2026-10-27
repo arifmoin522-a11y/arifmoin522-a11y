@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load core_tags patients_tags %}
+{% block title %}Patients{% endblock %}
+{% block content %}
+<header class="page-head">
+  <h1>Patients</h1>
+</header>
+<form class="toolbar" method="post" role="search">
+  {% csrf_token %}
+  <div class="searchfield">
+    {% icon "search" %}
+    <input type="search" name="q" value="{{ q }}" placeholder="Search by name, phone or patient code" aria-label="Search patients">
+  </div>
+  <button type="submit" class="button button-tonal">Search</button>
+  {% if searched %}
+    <button type="submit" class="button button-outlined" name="q" value="">Clear</button>
+  {% endif %}
+  {% if can_register %}
+    <a class="button button-filled" href="{% url 'patient_add' %}">Register patient</a>
+  {% endif %}
+</form>
+<p class="text-muted">Search stays on the server; codes are the only patient identifiers kept in links.</p>
+<div class="surface">
+  <table class="table">
+    <thead><tr><th>Code</th><th>Name</th><th>Phone</th><th>DOB</th><th></th></tr></thead>
+    <tbody>
+      {% for patient in page %}
+        <tr>
+          <td><span class="chip">{{ patient.patient_code }}</span></td>
+          <td><a class="link" href="{% url 'patient_detail' patient.pk %}">{{ patient.full_name }}</a></td>
+          <td>{% if can_view_contacts %}{{ patient.phone }}{% else %}{{ patient.phone|mask }}{% endif %}</td>
+          <td>{{ patient.date_of_birth|date:"Y-m-d" }}</td>
+          <td>{% include "components/badge.html" with variant="pending" label="Recorded" %}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="5">{% include "components/empty.html" with icon_name="person" title="No patients found" hint="Adjust the search or register a new patient." %}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "components/pagination.html" with page=page q=q %}
+{% endblock %}

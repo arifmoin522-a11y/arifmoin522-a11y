@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% load core_tags patients_tags %}
+{% block title %}{{ patient.full_name }}{% endblock %}
+{% block content %}
+<header class="page-head">
+  <a class="link back" href="{% url 'patient_list' %}">Back to patients</a>
+  <p class="eyebrow">{{ patient.patient_code }}</p>
+  <h1>{{ patient.full_name }}</h1>
+</header>
+
+<div class="detail-grid">
+  <section class="surface card-pad">
+    <h2>Demographics</h2>
+    <dl class="kv">
+      <div><dt>Date of birth</dt><dd>{{ patient.date_of_birth|date:"Y-m-d" }} <span class="text-muted">({{ patient.age_years }} y)</span></dd></div>
+      <div><dt>Gender</dt><dd>{{ patient.get_gender_display }}</dd></div>
+      <div><dt>Phone</dt><dd>{{ phone_display }}</dd></div>
+      <div><dt>Email</dt><dd>{{ patient.email|default:"—" }}</dd></div>
+      <div><dt>Blood group</dt><dd>{{ patient.blood_group_display }}</dd></div>
+      <div><dt>Address</dt><dd>{{ patient.address|default:"—" }}</dd></div>
+      <div><dt>City</dt><dd>{{ patient.city|default:"—" }}</dd></div>
+      <div><dt>Known allergies</dt><dd>{{ patient.known_allergies|default:"—" }}</dd></div>
+      <div><dt>Registered</dt><dd>{{ patient.registered_at|date:"Y-m-d H:i" }}</dd></div>
+    </dl>
+    <div class="actions">
+      {% if can_edit %}
+        <a class="button button-filled" href="{% url 'patient_edit' patient.pk %}">Edit patient</a>
+      {% endif %}
+      {% if can_book %}
+        <a class="button button-tonal" href="{% url 'appointment_book' %}?patient={{ patient.pk }}">Book appointment</a>
+      {% endif %}
+      {% if can_archive and patient.is_active %}
+        <a class="button button-outlined" href="{% url 'patient_remove' patient.pk %}">Archive</a>
+      {% endif %}
+    </div>
+  </section>
+
+  <section class="surface card-pad">
+    <h2>Emergency contacts</h2>
+    {% for contact in contacts %}
+      <dl class="kv">
+        <div><dt>Contact</dt><dd>{{ contact.name }} <span class="text-muted">({{ contact.relationship }})</span></dd></div>
+        <div><dt>Phone</dt><dd>{% if can_view_contacts %}{{ contact.phone }}{% else %}{{ contact.phone|mask }}{% endif %}</dd></div>
+      </dl>
+      <form method="post" action="{% url 'contact_primary' contact.pk %}" class="actions">
+        {% csrf_token %}
+        {% if contact.is_primary %}
+          {% include "components/badge.html" with variant="done" label="Primary" %}
+        {% else %}
+          <button type="submit" class="button button-tonal">Mark primary</button>
+        {% endif %}
+      </form>
+    {% empty %}
+      {% include "components/empty.html" with icon_name="id_card" title="No emergency contacts yet" %}
+    {% endfor %}
+
+    {% if can_edit %}
+    <details class="modal">
+      <summary class="button button-filled">Add contact</summary>
+      <div class="modal-panel">
+        <form method="post" class="form-stack" action="{% url 'contact_add' patient.pk %}">
+          {% csrf_token %}
+          {% include "components/field.html" with field=contact_form.name %}
+          {% include "components/field.html" with field=contact_form.relationship %}
+          {% include "components/field.html" with field=contact_form.phone %}
+          {% include "components/field.html" with field=contact_form.is_primary %}
+          <div class="actions">
+            <button type="submit" class="button button-filled">Save contact</button>
+          </div>
+        </form>
+      </div>
+    </details>
+    {% endif %}
+  </section>
+</div>
+
+<section class="surface card-pad">
+  <h2>Appointment history</h2>
+  {% include "partials/patient_appointments.html" %}
+</section>
+{% endblock %}
